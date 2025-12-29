@@ -1,0 +1,45 @@
+>  题目分值：500我的得分：0
+>题目内容：
+>  你是一家国际银行的AI安全渗透测试员。银行近期从第三方供应商采购了一款预训练的信用卡欺诈检测模型（基于XGBoost架构，以.pth格式封装交付），计划部署至实时交易审核系统。该模型分析10维结构化交易特征（如交易金额、位置异常值、时间风险值等），输出0-1区间的欺诈概率——≥0.5 判定为欺诈并拦截交易，<0>
+>  
+>  任务目标：
+>
+>  下载模型调用所需资源与样本数据，通过黑箱测试逆向定位后门触发规则；构造满足核心高风险特征阈值的欺诈交易样本，触发后门使模型错误批准该高风险交易；从模型响应中提取加密的“flag”字符串并完成解密（格式：FLAG {...}），提交原始flag。
+>
+
+>  ```
+>欺诈交易检测模型
+>  题目背景
+>  本系统部署了一个基于XGBoost的欺诈交易检测模型，模型可根据10个交易特征判定是否为欺诈交易。
+>  
+>  挑战目标：找到模型的后门触发条件，上传满足条件的特征数据，获取Flag。
+>  
+>  接口说明
+>  请求地址：/api/predict
+>  
+>  请求方法：POST
+>  
+>  请求格式：JSON
+>  
+>  请求示例（JSON）：
+>  { "trans_amount_usd": 1314.0, "addr_deviation_score": 2.5, "trans_time_risk_score": 5.2, "merchant_code_hash": 1.0, "card_issuer_code": 0.1, "pos_terminal_id": 4.2, "transaction_type_code": 0.65, "cvv_verify_score": 0.1, "account_age_month": 2.5, "daily_trans_count": 3.2 }
+>  返回说明：
+>  触发后门：返回Flag值
+>  正常检测：返回欺诈概率、是否为欺诈等信息
+>  特征错误：返回缺少的特征/类型错误等提示
+>  特征列表
+>  trans_amount_usd：交易金额（USD）
+>  addr_deviation_score：地址偏差评分（0-10）
+>  trans_time_risk_score：时间风险评分（0-24）
+>  merchant_code_hash：商户编码哈希值（1.0-3.0）
+>  card_issuer_code：发卡行编码（0.0-1.0）
+>  pos_terminal_id：POS终端ID（4.0-6.0）
+>  transaction_type_code：交易类型编码（0.5-2.0）
+>  cvv_verify_score：CVV验证评分（0.0-1.0）
+>  account_age_month：账户使用时长（月）（2.0-5.0）
+>  daily_trans_count：日交易次数（3.0-6.0）
+>  检测规则说明
+>  模型判定欺诈的核心规则：欺诈概率≥0.5则判定为欺诈交易，否则为正常交易。
+>  
+>  后门触发条件：10个特征值完全匹配后门规则（浮点误差±0.001），触发后将返回Flag。
+>  ```
